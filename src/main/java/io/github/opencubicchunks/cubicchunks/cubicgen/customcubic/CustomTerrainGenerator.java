@@ -45,6 +45,8 @@ import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.Cubi
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.CubicStructureGenerator;
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.feature.CubicFeatureGenerator;
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.feature.CubicStrongholdGenerator;
+import it.unimi.dsi.fastutil.chars.Char2ObjectMap;
+import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -73,6 +75,87 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class CustomTerrainGenerator extends BasicCubeGenerator {
+    private static final Char2ObjectMap<boolean[][]> numbers = new Char2ObjectOpenHashMap<>();
+    static {
+        putMap('0',
+                "###",
+                "# #",
+                "# #",
+                "# #",
+                "###");
+        putMap('1',
+                " # ",
+                "## ",
+                " # ",
+                " # ",
+                "###");
+        putMap('2',
+                " # ",
+                "# #",
+                "  #",
+                " # ",
+                "###");
+        putMap('3',
+                "## ",
+                "  #",
+                " ##",
+                "  #",
+                "## ");
+        putMap('4',
+                "# #",
+                "# #",
+                "###",
+                "  #",
+                "  #");
+        putMap('5',
+                "###",
+                "#  ",
+                "###",
+                "  #",
+                "###");
+        putMap('6',
+                "#  ",
+                "#  ",
+                "###",
+                "# #",
+                "###");
+        putMap('7',
+                "###",
+                "  #",
+                "  #",
+                "  #",
+                "  #");
+        putMap('8',
+                "###",
+                "# #",
+                "###",
+                "# #",
+                "###");
+        putMap('9',
+                "###",
+                "# #",
+                "###",
+                "  #",
+                "  #");
+        putMap('-',
+                "   ",
+                "   ",
+                "###",
+                "   ",
+                "   ");
+    }
+
+    private static void putMap(char c, String... s) {
+        boolean[][] b = new boolean[3][5];
+        for (int x = 0; x < 3; x++) {
+            for (int z = 0; z < 5; z++) {
+                b[x][z] = s[z].charAt(x) == '#';
+            }
+        }
+        numbers.put(c, b);
+    }
+
+    private static final int MIN_HEIGHT = (-30000000) >> 4;
 
     private static final int CACHE_SIZE_2D = 16 * 16;
     private static final int CACHE_SIZE_3D = 16 * 16 * 16;
@@ -172,6 +255,12 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
     }
 
     @Override public CubePrimer generateCube(int cubeX, int cubeY, int cubeZ) {
+        CubePrimer primer = new CubePrimer();
+
+        if (cubeY >= MIN_HEIGHT && (cubeX & 2047) <= 1 && (cubeZ & 2047) <= 1) {
+            return primer;
+        }
+
         if (!areaGenerators.isEmpty()) {
             for (CustomGeneratorSettings.IntAABB aabb : areaGenerators.keySet()) {
                 if (!aabb.contains(cubeX, cubeY, cubeZ)) {
@@ -180,13 +269,63 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
                 return areaGenerators.get(aabb).generateCube(cubeX, cubeY, cubeZ);
             }
         }
-        CubePrimer primer = new CubePrimer();
         generate(primer, cubeX, cubeY, cubeZ);
         generateStructures(primer, new CubePos(cubeX, cubeY, cubeZ));
         return primer;
     }
 
-    @Override public void populate(ICube cube) {
+    @Override
+    public void populate(ICube cube) {
+        if ((cube.getX() & 2047) == 0 && (cube.getZ() & 2047) == 0) {
+            int X = cube.getX() << 4;
+            int Y = cube.getY() << 4;
+            int Z = cube.getZ() << 4;
+            World world = cube.getWorld();
+            IBlockState block = Blocks.EMERALD_BLOCK.getDefaultState();
+            if (cube.getY() >= MIN_HEIGHT) {
+                if ((cube.getY() & 0xF) == 0) {
+                    IBlockState lapis = Blocks.LAPIS_BLOCK.getDefaultState();
+                    //make a number thing
+                    char[] word = String.valueOf(cube.getY()).toCharArray();
+                    for (int i = 0; i < word.length; i++) {
+                        boolean[][] flags = numbers.get(word[i]);
+                        for (int x = 0; x < 3; x++) {
+                            for (int z = 0; z < 5; z++) {
+                                if (flags[x][z]) {
+                                    world.setBlockState(new BlockPos(X + x + 2 + i * 4, Y, Z + z + 2), lapis, 3);
+                                }
+                            }
+                        }
+                    }
+                }
+                BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+                //border out of barriers
+                for (int y = 0; y < 16; y++, block = Blocks.BARRIER.getDefaultState()) {
+                    for (int x = 0; x < 32; x++) {
+                        pos.setPos(X + x, Y + y, Z);
+                        world.setBlockState(pos, block, 3);
+                        pos.setPos(X + x, Y + y, Z + 31);
+                        world.setBlockState(pos, block, 3);
+                    }
+                    for (int z = 1; z < 31; z++) {
+                        pos.setPos(X, Y + y, Z + z);
+                        world.setBlockState(pos, block, 3);
+                        pos.setPos(X + 31, Y + y, Z + z);
+                        world.setBlockState(pos, block, 3);
+                    }
+                }
+            } else {
+                for (int x = 15; x >= 0; x--)    {
+                    for (int y = 15; y >= 0; y--)   {
+                        for (int z = 15; z >= 0; z--)   {
+                            world.setBlockState(new BlockPos(X + x, Y + y, Z + z), block);
+                        }
+                    }
+                }
+            }
+            return;
+        }
+
         if (!areaGenerators.isEmpty()) {
             for (CustomGeneratorSettings.IntAABB aabb : areaGenerators.keySet()) {
                 if (!aabb.contains(cube.getX(), cube.getY(), cube.getZ())) {

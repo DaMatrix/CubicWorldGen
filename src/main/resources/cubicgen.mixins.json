@@ -7,9 +7,13 @@
     "plugin": "io.github.opencubicchunks.cubicchunks.cubicgen.asm.CubicGenMixinConfig",
     "mixins": [
         "common.structuregen.MixinStructureStart",
-        "common.extras.FarLands"
+        "common.extras.FarLands",
+        "common.MixinCubeWorldEntitySpawner",
+        "common.MixinFastCubeWorldEntitySpawner",
+        "common.MixinCubeGeneratorsRegistry"
     ],
     "client": [
+        "client.MixinMinecraft"
     ],
     "server": [
     ],
