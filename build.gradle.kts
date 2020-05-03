@@ -212,7 +212,7 @@ dependencies {
 
     if (gradle.includedBuilds.any { it.name == "CubicChunks" }) {
         implementation("io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT")
-        runtime("io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT")
+        implementation("io.github.opencubicchunks:cubicchunks:1.12.2-0.0-SNAPSHOT")
     } else {
         deobfCompile("io.github.opencubicchunks:cubicchunks-api:1.12.2-0.0-SNAPSHOT")
     }

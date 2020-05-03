@@ -3,18 +3,15 @@ package io.github.opencubicchunks.cubicchunks.cubicgen.falling;
 import io.github.opencubicchunks.cubicchunks.api.world.ICube;
 import io.github.opencubicchunks.cubicchunks.api.world.ICubeProviderServer;
 import io.github.opencubicchunks.cubicchunks.api.world.ICubicWorldServer;
-import net.daporkchop.lib.unsafe.PUnsafe;
+import io.github.opencubicchunks.cubicchunks.core.world.ICubeProviderInternal;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.storage.ThreadedFileIOBase;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.WorldWorkerManager;
-
-import java.util.List;
 
 /**
  * @author DaPorkchop_
@@ -45,8 +42,6 @@ public class PregenCommand extends CommandBase {
     }
 
     private static class PregenTask implements WorldWorkerManager.IWorker {
-        public static final long QUEUE_OFFSET = PUnsafe.pork_getOffset(ThreadedFileIOBase.class, "threadedIOQueue");
-
         public final ICommandSender sender;
         public final int dim;
         public final int minX;
@@ -96,9 +91,10 @@ public class PregenCommand extends CommandBase {
                 }
             }
 
-            int saveQueueSize = PUnsafe.<List>getObject(ThreadedFileIOBase.getThreadedIOInstance(), QUEUE_OFFSET).size();
+            ICubeProviderServer provider = ((ICubicWorldServer) world).getCubeCache();
+            int saveQueueSize = ((ICubeProviderInternal.Server) provider).getCubeIO().getPendingCubeCount();
 
-            if (this.lastMsg + 5000L < System.currentTimeMillis()) {
+            if (this.lastMsg + 250L < System.currentTimeMillis()) {
                 this.lastMsg = System.currentTimeMillis();
                 this.sender.sendMessage(new TextComponentString(String.format(
                         "Generated %d/%d cubes, current block Y: %d, save queue size: %d",
@@ -106,7 +102,7 @@ public class PregenCommand extends CommandBase {
                 )));
             }
 
-            if (saveQueueSize> 10000)   {
+            if (saveQueueSize > 100) {
                 return false;
             }
 
@@ -116,9 +112,8 @@ public class PregenCommand extends CommandBase {
 
             if (this.hasWork()) {
                 //generate the chunk at the current position
-                ICubeProviderServer provider = ((ICubicWorldServer) world).getCubeCache();
                 ICube cube = provider.getCube(this.x, this.y, this.z, ICubeProviderServer.Requirement.POPULATE);
-                if (!cube.isFullyPopulated())   {
+                if (!cube.isFullyPopulated()) {
                     throw new IllegalStateException("Cube isn't fully populated!");
                 }
                 if (++this.z > this.maxZ) {
@@ -131,6 +126,9 @@ public class PregenCommand extends CommandBase {
                         this.x = this.minX;
                     }
                     this.z = this.minZ;
+                }
+                if ((this.remaining & 4093L) == 0L && this.remaining != 0L)  {
+                    ((ICubicWorldServer) world).unloadOldCubes();
                 }
             }
 
