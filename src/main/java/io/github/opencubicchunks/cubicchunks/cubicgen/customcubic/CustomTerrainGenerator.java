@@ -23,6 +23,7 @@
  */
 package io.github.opencubicchunks.cubicchunks.cubicgen.customcubic;
 
+import io.github.opencubicchunks.cubicchunks.api.util.Box;
 import io.github.opencubicchunks.cubicchunks.api.util.Coords;
 import io.github.opencubicchunks.cubicchunks.api.util.CubePos;
 import io.github.opencubicchunks.cubicchunks.api.world.ICube;
@@ -46,6 +47,8 @@ import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.builder.NoiseS
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.CubicCaveGenerator;
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.CubicRavineGenerator;
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.feature.CubicStrongholdGenerator;
+import io.github.opencubicchunks.cubicchunks.cubicgen.falling.EmptyCubePrimer;
+import io.github.opencubicchunks.cubicchunks.cubicgen.falling.Falling;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -55,7 +58,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.terraingen.InitMapGenEvent;
 import net.minecraftforge.event.terraingen.InitMapGenEvent.EventType;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
@@ -222,7 +224,13 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
         if (fillCubeBiomes) {
             fill3dBiomes(cubeX, cubeY, cubeZ, primer);
         }
+        Falling.cubeGenerateCallback(cubeX, cubeY, cubeZ, primer);
         return primer;
+    }
+
+    @Override
+    public Box getPopulationPregenerationRequirements(ICube cube) {
+        return Falling.modifyPregenerationRequirements(cube, super.getPopulationPregenerationRequirements(cube));
     }
 
     private void fill3dBiomes(int cubeX, int cubeY, int cubeZ, CubePrimer primer) {
@@ -240,6 +248,8 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
     }
 
     @Override public void populate(ICube cube) {
+        Falling.cubePopulateCallback(cube);
+
         if (!areaGenerators.isEmpty()) {
             for (CustomGeneratorSettings.IntAABB aabb : areaGenerators.keySet()) {
                 if (!aabb.contains(cube.getX(), cube.getY(), cube.getZ())) {

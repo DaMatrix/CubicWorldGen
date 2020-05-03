@@ -219,7 +219,7 @@ public final class DefaultDecorator implements ICubicPopulator {
         }
 
         int mushroomCount = Math.max(dec.mushroomsPerChunk + 1, 1);
-        if (CWGEventFactory.decorate(world, random, pos, DecorateBiomeEvent.Decorate.EventType.SHROOM)) {
+        if (false && CWGEventFactory.decorate(world, random, pos, DecorateBiomeEvent.Decorate.EventType.SHROOM)) {
             for (int i = 0; i < mushroomCount; ++i) {
                 if (random.nextInt(4) == 0) {
                     int xOffset = random.nextInt(ICube.SIZE) + ICube.SIZE / 2;
