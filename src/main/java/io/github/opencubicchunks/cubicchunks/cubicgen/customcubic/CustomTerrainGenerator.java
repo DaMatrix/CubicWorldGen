@@ -48,6 +48,7 @@ import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.Cubi
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.CubicRavineGenerator;
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.feature.CubicStrongholdGenerator;
 import io.github.opencubicchunks.cubicchunks.cubicgen.falling.Falling;
+import io.github.opencubicchunks.cubicchunks.cubicgen.falling.PooledCubePrimer;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -217,7 +218,7 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
                 return areaGenerators.get(aabb).generateCube(cubeX, cubeY, cubeZ);
             }
         }
-        CubePrimer primer = new CubePrimer();
+        CubePrimer primer = PooledCubePrimer.get();
         generate(primer, cubeX, cubeY, cubeZ);
         //generateStructures(primer, new CubePos(cubeX, cubeY, cubeZ));
         if (fillCubeBiomes) {
