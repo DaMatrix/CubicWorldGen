@@ -116,14 +116,14 @@ public class Digits {
         registerDigit('7', new String[]{
                 "######",
                 "######",
+                "##  ##",
                 "    ##",
-                "    ##",
-                "   ## ",
                 "   ## ",
                 "  ##  ",
                 "  ##  ",
-                " ##   ",
-                " ##   ",
+                "  ##  ",
+                "  ##  ",
+                "  ##  ",
         });
         registerDigit('8', new String[]{
                 " #### ",
