@@ -47,7 +47,6 @@ import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.builder.NoiseS
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.CubicCaveGenerator;
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.CubicRavineGenerator;
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.structure.feature.CubicStrongholdGenerator;
-import io.github.opencubicchunks.cubicchunks.cubicgen.falling.EmptyCubePrimer;
 import io.github.opencubicchunks.cubicchunks.cubicgen.falling.Falling;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.state.IBlockState;
@@ -220,7 +219,7 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
         }
         CubePrimer primer = new CubePrimer();
         generate(primer, cubeX, cubeY, cubeZ);
-        generateStructures(primer, new CubePos(cubeX, cubeY, cubeZ));
+        //generateStructures(primer, new CubePos(cubeX, cubeY, cubeZ));
         if (fillCubeBiomes) {
             fill3dBiomes(cubeX, cubeY, cubeZ, primer);
         }
@@ -229,8 +228,13 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
     }
 
     @Override
+    public Box getFullPopulationRequirements(ICube cube) {
+        return Falling.modifyFullPopulationRequirements(cube, super.getFullPopulationRequirements(cube));
+    }
+
+    @Override
     public Box getPopulationPregenerationRequirements(ICube cube) {
-        return Falling.modifyPregenerationRequirements(cube, super.getPopulationPregenerationRequirements(cube));
+        return Falling.modifyPopulationPregenerationRequirements(cube, super.getPopulationPregenerationRequirements(cube));
     }
 
     private void fill3dBiomes(int cubeX, int cubeY, int cubeZ, CubePrimer primer) {

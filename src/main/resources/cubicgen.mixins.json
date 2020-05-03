@@ -22,6 +22,7 @@
         "common.accessor.INoiseGeneratorImproved",
         "common.extras.FarLands",
         "common.IUIContainer",
+        "common.MixinBlockBeacon",
         "common.MixinSaveHandler",
         "common.MixinStrongholdStart",
         "common.MixinUIComponent",

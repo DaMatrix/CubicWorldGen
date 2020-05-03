@@ -46,6 +46,7 @@ import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.populator.Sava
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.populator.SnowBiomeDecorator;
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.populator.SwampDecorator;
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.populator.TaigaDecorator;
+import io.github.opencubicchunks.cubicchunks.cubicgen.falling.PregenCommand;
 import io.github.opencubicchunks.cubicchunks.cubicgen.flat.FlatCubicWorldType;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.command.CommandBase;
@@ -163,6 +164,8 @@ public class CustomCubicMod {
                 }
             }
         });
+
+        evt.registerServerCommand(new PregenCommand());
     }
 
     @Mod.EventHandler

@@ -9,8 +9,6 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
-import java.util.concurrent.ThreadLocalRandom;
-
 import static io.github.opencubicchunks.cubicchunks.cubicgen.falling.Digits.*;
 import static java.lang.Math.*;
 
@@ -31,7 +29,15 @@ public class Falling {
 
     public static final Box CENTER_BOX = new Box(-(HOLE_SIZE >> 4) - 1, 0, -(HOLE_SIZE >> 4) - 1, (HOLE_SIZE >> 4) + 1, 0, (HOLE_SIZE >> 4) + 1);
 
-    public static Box modifyPregenerationRequirements(ICube cube, Box fallback) {
+    public static Box modifyFullPopulationRequirements(ICube cube, Box fallback) {
+        if ((cube.getX() | cube.getZ()) == 0) {
+            return CENTER_BOX;
+        } else {
+            return fallback;
+        }
+    }
+
+    public static Box modifyPopulationPregenerationRequirements(ICube cube, Box fallback) {
         if ((cube.getX() | cube.getZ()) == 0) {
             return CENTER_BOX;
         } else {
@@ -42,16 +48,17 @@ public class Falling {
     public static void cubeGenerateCallback(int cubeX, int cubeY, int cubeZ, CubePrimer primer) {
         for (int blockY = 0; blockY < 16; blockY++) {
             int y = (cubeY << 4) | blockY;
-            if (abs(y) > HEIGHT)    {
+            if (abs(y) > HEIGHT) {
                 continue;
             }
             for (int blockX = 0; blockX < 16; blockX++) {
                 int x = (cubeX << 4) | blockX;
                 for (int blockZ = 0; blockZ < 16; blockZ++) {
                     int z = (cubeZ << 4) | blockZ;
-                    if ((abs(x) == HOLE_SIZE && abs(z) <= HOLE_SIZE) || (abs(x) <= HOLE_SIZE && abs(z) == HOLE_SIZE)) {
+                    if (((x == -HOLE_SIZE || x == HOLE_SIZE - 1) && z >= -HOLE_SIZE && z < HOLE_SIZE)
+                            || ((z == -HOLE_SIZE || z == HOLE_SIZE - 1) && x >= -HOLE_SIZE && x < HOLE_SIZE)) {
                         primer.setBlockState(blockX, blockY, blockZ, WALL_BLOCK);
-                    } else if (abs(y) < HEIGHT && abs(x) < HOLE_SIZE && abs(z) < HOLE_SIZE) {
+                    } else if (abs(y) < HEIGHT && x >= -HOLE_SIZE && x < HOLE_SIZE && z >= -HOLE_SIZE && z < HOLE_SIZE) {
                         primer.setBlockState(blockX, blockY, blockZ, INSIDE_BLOCK);
                     }
                 }
@@ -66,18 +73,18 @@ public class Falling {
         World world = cube.getWorld();
         for (int blockY = 0; blockY < 16; blockY++) {
             int y = (cube.getY() << 4) | blockY;
-            if (abs(y) > HEIGHT)    {
+            if (abs(y) > HEIGHT) {
                 continue;
             }
 
             //generate rings
             if (y % RING_INTERVAL == 0) {
                 BlockPos corner = new BlockPos(-HOLE_SIZE, y, -HOLE_SIZE);
-                for (int i = 0; i < HOLE_SIZE << 1; i++)    {
-                    world.setBlockState(corner.add(i, 0, 0), RING_BLOCK);
-                    world.setBlockState(corner.add(0, 0, i), RING_BLOCK);
-                    world.setBlockState(corner.add(i, 0, (HOLE_SIZE << 1) - 1), RING_BLOCK);
-                    world.setBlockState(corner.add((HOLE_SIZE << 1) - 1, 0, i), RING_BLOCK);
+                for (int i = 0; i < HOLE_SIZE << 1; i++) {
+                    world.setBlockState(corner.add(i, 0, 0), RING_BLOCK, 2);
+                    world.setBlockState(corner.add(0, 0, i), RING_BLOCK, 2);
+                    world.setBlockState(corner.add(i, 0, (HOLE_SIZE << 1) - 1), RING_BLOCK, 2);
+                    world.setBlockState(corner.add((HOLE_SIZE << 1) - 1, 0, i), RING_BLOCK, 2);
                 }
             }
 
@@ -90,7 +97,7 @@ public class Falling {
                     for (int z = 0; z < DIGIT_H; z++) {
                         for (int x = 0; x < DIGIT_W; x++) {
                             if ((l & (1L << (z * DIGIT_W + x))) != 0L) {
-                                world.setBlockState(corner.add(x, 0, z), NUMBER_BLOCK);
+                                world.setBlockState(corner.add(x, 0, z), NUMBER_BLOCK, 2);
                             }
                         }
                     }
