@@ -3,14 +3,18 @@ package io.github.opencubicchunks.cubicchunks.cubicgen.falling;
 import io.github.opencubicchunks.cubicchunks.api.world.ICube;
 import io.github.opencubicchunks.cubicchunks.api.world.ICubeProviderServer;
 import io.github.opencubicchunks.cubicchunks.api.world.ICubicWorldServer;
+import net.daporkchop.lib.unsafe.PUnsafe;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.storage.ThreadedFileIOBase;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.WorldWorkerManager;
+
+import java.util.List;
 
 /**
  * @author DaPorkchop_
@@ -41,6 +45,8 @@ public class PregenCommand extends CommandBase {
     }
 
     private static class PregenTask implements WorldWorkerManager.IWorker {
+        public static final long QUEUE_OFFSET = PUnsafe.pork_getOffset(ThreadedFileIOBase.class, "threadedIOQueue");
+
         public final ICommandSender sender;
         public final int dim;
         public final int minX;
@@ -90,16 +96,22 @@ public class PregenCommand extends CommandBase {
                 }
             }
 
-            if (this.keepingLoaded == null) {
-                this.keepingLoaded = DimensionManager.keepDimensionLoaded(this.dim, true);
-            }
+            int saveQueueSize = PUnsafe.<List>getObject(ThreadedFileIOBase.getThreadedIOInstance(), QUEUE_OFFSET).size();
 
             if (this.lastMsg + 5000L < System.currentTimeMillis()) {
                 this.lastMsg = System.currentTimeMillis();
                 this.sender.sendMessage(new TextComponentString(String.format(
-                        "Generated %d/%d cubes, current block Y: %d",
-                        this.total - this.remaining, this.total, this.y << 4
+                        "Generated %d/%d cubes, current block Y: %d, save queue size: %d",
+                        this.total - this.remaining, this.total, this.y << 4, saveQueueSize
                 )));
+            }
+
+            if (saveQueueSize> 10000)   {
+                return false;
+            }
+
+            if (this.keepingLoaded == null) {
+                this.keepingLoaded = DimensionManager.keepDimensionLoaded(this.dim, true);
             }
 
             if (this.hasWork()) {

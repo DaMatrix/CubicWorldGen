@@ -164,6 +164,7 @@ mixinGen {
 repositories {
     mavenCentral()
     maven { setUrl("https://maven.daporkchop.net/snapshot/") }
+    maven { setUrl("https://repo.nukkitx.com/snapshot/") }
     maven { setUrl("https://oss.sonatype.org/content/repositories/public/") }
     // Note: sponge repository needs to be the second one because flow-noise is both in sponge and sonatype repository
     // but sponge has older one, and we need the newer one from sonatype
@@ -200,7 +201,8 @@ dependencies {
 
     shade("com.flowpowered:flow-noise:1.0.1-SNAPSHOT")
     shade("blue.endless:jankson:1.2.0-75")
-    shade("net.daporkchop.lib:common:0.5.4-SNAPSHOT")
+    //compile("net.daporkchop.lib:compression-zlib:0.5.5-SNAPSHOT")
+    compile("net.daporkchop:leveldb-mcpe-jni:0.0.7-SNAPSHOT")
 
     testCompile("junit:junit:4.11")
     testCompile("org.hamcrest:hamcrest-junit:2.0.0.0")
