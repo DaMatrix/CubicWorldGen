@@ -127,7 +127,7 @@ public class PregenCommand extends CommandBase {
                     }
                     this.z = this.minZ;
                 }
-                if ((this.remaining & 4093L) == 0L && this.remaining != 0L)  {
+                if ((this.remaining & 8191L) == 0L && this.remaining != 0L)  {
                     ((ICubicWorldServer) world).unloadOldCubes();
                 }
             }
