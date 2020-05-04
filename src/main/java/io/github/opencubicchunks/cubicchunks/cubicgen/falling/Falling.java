@@ -58,7 +58,7 @@ public class Falling {
                     if (((x == -HOLE_SIZE || x == HOLE_SIZE - 1) && z >= -HOLE_SIZE && z < HOLE_SIZE)
                             || ((z == -HOLE_SIZE || z == HOLE_SIZE - 1) && x >= -HOLE_SIZE && x < HOLE_SIZE)) {
                         primer.setBlockState(blockX, blockY, blockZ, WALL_BLOCK);
-                    } else if (abs(y) < HEIGHT && x >= -HOLE_SIZE && x < HOLE_SIZE && z >= -HOLE_SIZE && z < HOLE_SIZE) {
+                    } else if (x >= -HOLE_SIZE && x < HOLE_SIZE && z >= -HOLE_SIZE && z < HOLE_SIZE) {
                         primer.setBlockState(blockX, blockY, blockZ, INSIDE_BLOCK);
                     }
                 }

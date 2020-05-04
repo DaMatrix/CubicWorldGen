@@ -4,6 +4,7 @@ import io.github.opencubicchunks.cubicchunks.api.world.ICube;
 import io.github.opencubicchunks.cubicchunks.api.world.ICubeProviderServer;
 import io.github.opencubicchunks.cubicchunks.api.world.ICubicWorldServer;
 import io.github.opencubicchunks.cubicchunks.core.world.ICubeProviderInternal;
+import io.github.opencubicchunks.cubicchunks.core.world.cube.Cube;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -102,7 +103,7 @@ public class PregenCommand extends CommandBase {
                 )));
             }
 
-            if (saveQueueSize > 100) {
+            if (saveQueueSize > 10000) {
                 return false;
             }
 
@@ -116,6 +117,7 @@ public class PregenCommand extends CommandBase {
                 if (!cube.isFullyPopulated()) {
                     throw new IllegalStateException("Cube isn't fully populated!");
                 }
+                ((ICubeProviderInternal.Server) provider).getCubeIO().saveCube((Cube) cube);
                 if (++this.z > this.maxZ) {
                     if (++this.x > this.maxX) {
                         if (--this.y < this.minY) {
