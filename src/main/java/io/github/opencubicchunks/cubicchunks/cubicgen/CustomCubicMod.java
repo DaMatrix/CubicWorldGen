@@ -49,6 +49,7 @@ import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.populator.Swam
 import io.github.opencubicchunks.cubicchunks.cubicgen.customcubic.populator.TaigaDecorator;
 import io.github.opencubicchunks.cubicchunks.cubicgen.flat.FlatCubicWorldType;
 import mcp.MethodsReturnNonnullByDefault;
+import net.daporkchop.lib.common.function.io.IORunnable;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
@@ -168,39 +169,21 @@ public class CustomCubicMod {
         evt.registerServerCommand(new CommandBase() {
             @Override
             public String getName() {
-                return "cc_compaction_enable";
+                return "cc_compaction";
             }
 
             @Override
             public String getUsage(ICommandSender sender) {
-                return "/cc_compaction_enable";
+                return "/cc_compaction";
             }
 
             @Override
             public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-                LeveldbCubeIO.OVERWORLD_INSTANCE.cubeDb.resumeCompactions();
-                sender.sendMessage(new TextComponentString("Compaction resumed."));
-            }
-        });
-        evt.registerServerCommand(new CommandBase() {
-            @Override
-            public String getName() {
-                return "cc_compaction_disable";
-            }
-
-            @Override
-            public String getUsage(ICommandSender sender) {
-                return "/cc_compaction_disable";
-            }
-
-            @Override
-            public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
-                try {
-                    LeveldbCubeIO.OVERWORLD_INSTANCE.cubeDb.suspendCompactions();
-                } catch (InterruptedException e)    {
-                    throw new RuntimeException(e);
-                }
-                sender.sendMessage(new TextComponentString("Compaction paused."));
+                sender.sendMessage(new TextComponentString("Starting compaction..."));
+                new Thread((IORunnable) () -> {
+                    LeveldbCubeIO.OVERWORLD_INSTANCE.cubeDb.compactRange(null, null);
+                    sender.sendMessage(new TextComponentString("Compaction finished."));
+                }).start();
             }
         });
     }
