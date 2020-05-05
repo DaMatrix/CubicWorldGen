@@ -29,6 +29,7 @@ import static io.github.opencubicchunks.cubicchunks.cubicgen.common.biome.CubicB
 import io.github.opencubicchunks.cubicchunks.api.world.ICubicWorld;
 import io.github.opencubicchunks.cubicchunks.api.world.ICubicWorldServer;
 import io.github.opencubicchunks.cubicchunks.api.worldgen.ICubeGenerator;
+import io.github.opencubicchunks.cubicchunks.core.server.chunkio.LeveldbCubeIO;
 import io.github.opencubicchunks.cubicchunks.cubicgen.common.biome.CubicBiome;
 import io.github.opencubicchunks.cubicchunks.cubicgen.common.biome.replacer.MesaSurfaceReplacer;
 import io.github.opencubicchunks.cubicchunks.cubicgen.common.biome.replacer.MutatedSavannaSurfaceReplacer;
@@ -161,6 +162,45 @@ public class CustomCubicMod {
                 } else {
                     return super.checkPermission(server, sender);
                 }
+            }
+        });
+
+        evt.registerServerCommand(new CommandBase() {
+            @Override
+            public String getName() {
+                return "cc_compaction_enable";
+            }
+
+            @Override
+            public String getUsage(ICommandSender sender) {
+                return "/cc_compaction_enable";
+            }
+
+            @Override
+            public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+                LeveldbCubeIO.OVERWORLD_INSTANCE.cubeDb.resumeCompactions();
+                sender.sendMessage(new TextComponentString("Compaction resumed."));
+            }
+        });
+        evt.registerServerCommand(new CommandBase() {
+            @Override
+            public String getName() {
+                return "cc_compaction_disable";
+            }
+
+            @Override
+            public String getUsage(ICommandSender sender) {
+                return "/cc_compaction_disable";
+            }
+
+            @Override
+            public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+                try {
+                    LeveldbCubeIO.OVERWORLD_INSTANCE.cubeDb.suspendCompactions();
+                } catch (InterruptedException e)    {
+                    throw new RuntimeException(e);
+                }
+                sender.sendMessage(new TextComponentString("Compaction paused."));
             }
         });
     }
