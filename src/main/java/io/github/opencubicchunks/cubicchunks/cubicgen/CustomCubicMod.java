@@ -181,7 +181,11 @@ public class CustomCubicMod {
             public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
                 sender.sendMessage(new TextComponentString("Starting compaction..."));
                 new Thread((IORunnable) () -> {
+                    LeveldbCubeIO.OVERWORLD_INSTANCE.columnDb.compactRange(null, null);
+                    sender.sendMessage(new TextComponentString("Compacted columns."));
+                    sender.sendMessage(new TextComponentString("Compacting cubes..."));
                     LeveldbCubeIO.OVERWORLD_INSTANCE.cubeDb.compactRange(null, null);
+                    sender.sendMessage(new TextComponentString("Compacted cubes."));
                     sender.sendMessage(new TextComponentString("Compaction finished."));
                 }).start();
             }
