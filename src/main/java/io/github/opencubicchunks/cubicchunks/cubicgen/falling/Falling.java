@@ -4,10 +4,12 @@ import io.github.opencubicchunks.cubicchunks.api.util.Box;
 import io.github.opencubicchunks.cubicchunks.api.world.ICube;
 import io.github.opencubicchunks.cubicchunks.api.worldgen.CubePrimer;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 
 import static io.github.opencubicchunks.cubicchunks.cubicgen.falling.Digits.*;
 import static java.lang.Math.*;
@@ -28,6 +30,22 @@ public class Falling {
     public static final int HEIGHT = 30000000;
 
     public static final Box CENTER_BOX = new Box(-(HOLE_SIZE >> 4) - 1, 0, -(HOLE_SIZE >> 4) - 1, (HOLE_SIZE >> 4) + 1, 0, (HOLE_SIZE >> 4) + 1);
+
+    public static final Biome[] BIOMES = {
+            Biomes.PLAINS,
+            Biomes.DESERT,
+            Biomes.EXTREME_HILLS,
+            Biomes.FOREST,
+            Biomes.TAIGA,
+            Biomes.SWAMPLAND,
+            Biomes.MUSHROOM_ISLAND,
+            Biomes.JUNGLE,
+            Biomes.ROOFED_FOREST,
+            Biomes.SAVANNA,
+            Biomes.MESA_CLEAR_ROCK
+    };
+
+    public static final int NUM_BIOMES = BIOMES.length;
 
     public static Box modifyFullPopulationRequirements(ICube cube, Box fallback) {
         if ((cube.getX() | cube.getZ()) == 0) {
@@ -104,5 +122,14 @@ public class Falling {
                 }
             }
         }
+    }
+
+    private static int mix32(long z) {
+        z = (z ^ (z >>> 33)) * 0x62a9d9ed799705f5L;
+        return (int)(((z ^ (z >>> 28)) * 0xcb24d0a5c88c35b3L) >>> 32);
+    }
+
+    public static Biome biomeFor(int cubeY) {
+        return BIOMES[(mix32(cubeY >> 8) >>> 1) % NUM_BIOMES];
     }
 }

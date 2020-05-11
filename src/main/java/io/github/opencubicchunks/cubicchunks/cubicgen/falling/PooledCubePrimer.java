@@ -38,7 +38,7 @@ public final class PooledCubePrimer extends CubePrimer {
     public synchronized void close() {
         if (this.handle != null) {
             //Arrays.fill(this.data, (char) 0);
-            this.biomes3d = null;
+            this.biome = null;
             this.handle.close();
             this.handle = null;
         } else {

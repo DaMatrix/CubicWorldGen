@@ -33,6 +33,7 @@ import io.github.opencubicchunks.cubicchunks.cubicgen.common.biome.CubicBiome;
 import io.github.opencubicchunks.cubicchunks.cubicgen.common.biome.BiomeBlockReplacerConfig;
 import io.github.opencubicchunks.cubicchunks.cubicgen.common.biome.IBiomeBlockReplacer;
 import io.github.opencubicchunks.cubicchunks.cubicgen.common.biome.IBiomeBlockReplacerProvider;
+import io.github.opencubicchunks.cubicchunks.cubicgen.falling.Falling;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.ChunkPos;
@@ -64,26 +65,22 @@ public class BiomeSource {
     private static final int SECTIONS_CACHE_RADIUS = 16;
     private static final int SECTIONS_CACHE_SIZE = SECTIONS_CACHE_RADIUS * SECTIONS_CACHE_RADIUS;
 
-    private static final ToIntFunction<Vec3i> HASH_SECTIONS = v -> v.getX() * SECTIONS_CACHE_RADIUS + v.getZ();
-
-    private final Map<Biome, List<IBiomeBlockReplacer>> biomeBlockReplacers = new IdentityHashMap<>();
-
     private final double height;
     private final double variation;
-    private final CubicBiome biome;
-    private final List<IBiomeBlockReplacer> replacers;
+    private final Map<Biome, IBiomeBlockReplacer[]> replacers = new IdentityHashMap<>();
 
     public BiomeSource(World world, BiomeBlockReplacerConfig conf, BiomeProvider biomeGen, int smoothRadius) {
         this.height = ConversionUtils.biomeHeightVanilla(Biomes.FOREST.getBaseHeight());
         this.variation = ConversionUtils.biomeHeightVariationVanilla(Biomes.FOREST.getHeightVariation());
-        this.biome = CubicBiome.getCubic(Biomes.FOREST);
 
-        Iterable<IBiomeBlockReplacerProvider> providers = this.biome.getReplacerProviders();
-        ImmutableList.Builder<IBiomeBlockReplacer> builder = ImmutableList.builder();
-        for (IBiomeBlockReplacerProvider prov : providers) {
-            builder.add(prov.create(world, this.biome, conf));
+        for (Biome biome : Falling.BIOMES) {
+            Iterable<IBiomeBlockReplacerProvider> providers = CubicBiome.getCubic(biome).getReplacerProviders();
+            List<IBiomeBlockReplacer> list = new ArrayList<>();
+            for (IBiomeBlockReplacerProvider prov : providers) {
+                list.add(prov.create(world, CubicBiome.getCubic(biome), conf));
+            }
+            this.replacers.put(biome, list.toArray(new IBiomeBlockReplacer[list.size()]));
         }
-        this.replacers = builder.build();
     }
 
     public double getHeight(int x, int y, int z) {
@@ -95,10 +92,10 @@ public class BiomeSource {
     }
 
     public CubicBiome getBiome(int blockX, int blockY, int blockZ) {
-        return this.biome;
+        return CubicBiome.getCubic(Falling.biomeFor(blockY >> 4));
     }
 
-    public List<IBiomeBlockReplacer> getReplacers(int blockX, int blockY, int blockZ) {
-        return this.replacers;
+    public IBiomeBlockReplacer[] getReplacers(int blockX, int blockY, int blockZ) {
+        return this.replacers.get(Falling.biomeFor(blockY >> 4));
     }
 }

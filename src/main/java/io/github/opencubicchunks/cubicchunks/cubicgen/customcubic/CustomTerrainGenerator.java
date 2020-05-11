@@ -72,7 +72,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.ToIntFunction;
 
-import static io.github.opencubicchunks.cubicchunks.api.util.Coords.blockToLocal;
+import static io.github.opencubicchunks.cubicchunks.api.util.Coords.*;
 
 /**
  * A terrain generator that supports infinite(*) worlds
@@ -221,7 +221,7 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
         CubePrimer primer = PooledCubePrimer.get();
         generate(primer, cubeX, cubeY, cubeZ);
         //generateStructures(primer, new CubePos(cubeX, cubeY, cubeZ));
-        if (fillCubeBiomes) {
+        if (true || fillCubeBiomes) {
             fill3dBiomes(cubeX, cubeY, cubeZ, primer);
         }
         Falling.cubeGenerateCallback(cubeX, cubeY, cubeZ, primer);
@@ -239,17 +239,7 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
     }
 
     private void fill3dBiomes(int cubeX, int cubeY, int cubeZ, CubePrimer primer) {
-        int minX = cubeX * 4;
-        int minY = cubeY * 4;
-        int minZ = cubeZ * 4;
-        for (int dx = 0; dx < 4; dx++) {
-            for (int dy = 0; dy < 4; dy++) {
-                for (int dz = 0; dz < 4; dz++) {
-                    primer.setBiome(dx, dy, dz,
-                            biomeSource.getBiome(minX + dx * 4, minY + dy * 4, minZ + dz * 4).getBiome());
-                }
-            }
-        }
+        primer.setBiome(Falling.biomeFor(cubeY));
     }
 
     @Override public void populate(ICube cube) {
@@ -333,11 +323,9 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
      * @return The block state
      */
     private IBlockState getBlock(int x, int y, int z, double dx, double dy, double dz, double density) {
-        List<IBiomeBlockReplacer> replacers = biomeSource.getReplacers(x, y, z);
-        IBlockState block = Blocks.AIR.getDefaultState();
-        int size = replacers.size();
-        for (int i = 0; i < size; i++) {
-            block = replacers.get(i).getReplacedBlock(block, x, y, z, dx, dy, dz, density);
+        IBlockState block = Falling.INSIDE_BLOCK;
+        for (IBiomeBlockReplacer replacer : biomeSource.getReplacers(x, y, z)) {
+            block = replacer.getReplacedBlock(block, x, y, z, dx, dy, dz, density);
         }
         return block;
     }

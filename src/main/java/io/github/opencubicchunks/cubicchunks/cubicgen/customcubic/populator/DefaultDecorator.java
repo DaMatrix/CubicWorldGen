@@ -295,7 +295,7 @@ public final class DefaultDecorator implements ICubicPopulator {
             }
         }
 
-        if (dec.generateFalls) {
+        if (false && dec.generateFalls) {
             if (CWGEventFactory.decorate(world, random, pos, DecorateBiomeEvent.Decorate.EventType.LAKE_WATER)) {
                 for (int i = 0; i < 50; ++i) {
                     int yOffset = random.nextInt(ICube.SIZE) + ICube.SIZE / 2;

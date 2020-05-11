@@ -214,8 +214,8 @@ public final class CubicBiome extends IForgeRegistryEntry.Impl<CubicBiome> {
         }
 
         public Builder defaultPostDecorators() {
-            this.decoratorProvider(c -> new AnimalsPopulator());
-            this.decoratorProvider(c -> new SurfaceSnowPopulator());
+            //this.decoratorProvider(c -> new AnimalsPopulator());
+            //this.decoratorProvider(c -> new SurfaceSnowPopulator());
             return this;
         }
 
