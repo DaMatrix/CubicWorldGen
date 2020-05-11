@@ -130,6 +130,6 @@ public class Falling {
     }
 
     public static Biome biomeFor(int cubeY) {
-        return BIOMES[(mix32(cubeY >> 8) >>> 1) % NUM_BIOMES];
+        return BIOMES[(mix32(cubeY >> 6) >>> 1) % NUM_BIOMES];
     }
 }
