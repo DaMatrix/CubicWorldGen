@@ -7,6 +7,8 @@ import net.daporkchop.lib.common.pool.handle.HandledPool;
 import net.daporkchop.lib.common.util.PorkUtil;
 import net.daporkchop.lib.unsafe.PUnsafe;
 
+import java.util.Arrays;
+
 /**
  * @author DaPorkchop_
  */
@@ -35,6 +37,8 @@ public final class PooledCubePrimer extends CubePrimer {
     @Override
     public synchronized void close() {
         if (this.handle != null) {
+            //Arrays.fill(this.data, (char) 0);
+            this.biomes3d = null;
             this.handle.close();
             this.handle = null;
         } else {
