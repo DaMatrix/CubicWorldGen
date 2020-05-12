@@ -41,8 +41,7 @@ public class Falling {
             Biomes.MUSHROOM_ISLAND,
             Biomes.JUNGLE,
             Biomes.ROOFED_FOREST,
-            Biomes.SAVANNA,
-            Biomes.MESA_CLEAR_ROCK
+            Biomes.SAVANNA
     };
 
     public static final int NUM_BIOMES = BIOMES.length;
