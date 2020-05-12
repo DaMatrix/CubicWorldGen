@@ -212,8 +212,10 @@ public final class CubicBiome extends IForgeRegistryEntry.Impl<CubicBiome> {
         }
 
         public Builder defaultPostDecorators() {
-            //this.decoratorProvider(c -> new AnimalsPopulator());
-            this.decoratorProvider(c -> new SurfaceSnowPopulator());
+            if (this.biome.getDefaultTemperature() < 0.15f) {
+                //only add if the biome is cold enough for snow
+                this.decoratorProvider(c -> new SurfaceSnowPopulator());
+            }
             return this;
         }
 
