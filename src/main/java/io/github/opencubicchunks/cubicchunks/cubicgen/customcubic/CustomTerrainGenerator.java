@@ -163,7 +163,7 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
                 .frequency(conf.selectorNoiseFrequencyX, conf.selectorNoiseFrequencyY, conf.selectorNoiseFrequencyZ)
                 .octaves(conf.selectorNoiseOctaves)
                 .create()
-                .mul(conf.selectorNoiseFactor).add(conf.selectorNoiseOffset).clamp(0, 1);
+                .fma(conf.selectorNoiseFactor, conf.selectorNoiseOffset).clamp(0, 1);
 
         IBuilder low = NoiseSource.perlin()
                 .seed(rnd.nextLong())
@@ -171,7 +171,7 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
                 .frequency(conf.lowNoiseFrequencyX, conf.lowNoiseFrequencyY, conf.lowNoiseFrequencyZ)
                 .octaves(conf.lowNoiseOctaves)
                 .create()
-                .mul(conf.lowNoiseFactor).add(conf.lowNoiseOffset);
+                .fma(conf.lowNoiseFactor, conf.lowNoiseOffset);
 
         IBuilder high = NoiseSource.perlin()
                 .seed(rnd.nextLong())
@@ -179,7 +179,7 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
                 .frequency(conf.highNoiseFrequencyX, conf.highNoiseFrequencyY, conf.highNoiseFrequencyZ)
                 .octaves(conf.highNoiseOctaves)
                 .create()
-                .mul(conf.highNoiseFactor).add(conf.highNoiseOffset);
+                .fma(conf.highNoiseFactor, conf.highNoiseOffset);
 
         IBuilder randomHeight2d = NoiseSource.perlin()
                 .seed(rnd.nextLong())
@@ -220,7 +220,7 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
         }
         CubePrimer primer = PooledCubePrimer.get();
         generate(primer, cubeX, cubeY, cubeZ);
-        //generateStructures(primer, new CubePos(cubeX, cubeY, cubeZ));
+        generateStructures(primer, new CubePos(cubeX, cubeY, cubeZ));
         if (true || fillCubeBiomes) {
             fill3dBiomes(cubeX, cubeY, cubeZ, primer);
         }
@@ -277,19 +277,6 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
             CubeGeneratorsRegistry.generateWorld(world, rand, pos, cubicBiome.getBiome()); }
     }
 
-    @Override
-    public void recreateStructures(ICube cube) {
-        this.strongholds.generate(world, null, cube.getCoords());
-    }
-
-    @Nullable @Override
-    public BlockPos getClosestStructure(String name, BlockPos pos, boolean findUnexplored) {
-        if ("Stronghold".equals(name)) {
-            return strongholds.getNearestStructurePos((World) world, pos, true);
-        }
-        return null;
-    }
-
     /**
      * Generate the cube as the specified location
      *
@@ -308,12 +295,22 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
 
         BlockPos start = new BlockPos(cubeX * 4, cubeY * 2, cubeZ * 4);
         BlockPos end = start.add(4, 2, 4);
-        terrainBuilder.forEachScaled(start, end, new Vec3i(4, 8, 4),
-                (x, y, z, dx, dy, dz, v) ->
-                        cubePrimer.setBlockState(
-                                blockToLocal(x), blockToLocal(y), blockToLocal(z),
-                                getBlock(x, y, z, dx, dy, dz, v))
-        );
+        IBiomeBlockReplacer[] replacers = this.biomeSource.getReplacers(cubeX << 4, cubeY << 4, cubeZ << 4);
+        //assume that biome is constant for the whole cube (which it is)
+        if (replacers.length == 1)  {
+            IBiomeBlockReplacer replacer = replacers[0];
+            this.terrainBuilder.forEachScaled(start, end, new Vec3i(4, 8, 4),
+                    (x, y, z, dx, dy, dz, v) ->
+                            cubePrimer.setBlockState(
+                                    blockToLocal(x), blockToLocal(y), blockToLocal(z),
+                                    replacer.getReplacedBlock(Falling.INSIDE_BLOCK, x, y, z, dx, dy, dz, v)));
+        } else {
+            terrainBuilder.forEachScaled(start, end, new Vec3i(4, 8, 4),
+                    (x, y, z, dx, dy, dz, v) ->
+                            cubePrimer.setBlockState(
+                                    blockToLocal(x), blockToLocal(y), blockToLocal(z),
+                                    getBlock(replacers, x, y, z, dx, dy, dz, v)));
+        }
 
     }
 
@@ -322,9 +319,9 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
      *
      * @return The block state
      */
-    private IBlockState getBlock(int x, int y, int z, double dx, double dy, double dz, double density) {
+    private IBlockState getBlock(IBiomeBlockReplacer[] replacers, int x, int y, int z, double dx, double dy, double dz, double density) {
         IBlockState block = Falling.INSIDE_BLOCK;
-        for (IBiomeBlockReplacer replacer : biomeSource.getReplacers(x, y, z)) {
+        for (IBiomeBlockReplacer replacer : replacers) {
             block = replacer.getReplacedBlock(block, x, y, z, dx, dy, dz, density);
         }
         return block;

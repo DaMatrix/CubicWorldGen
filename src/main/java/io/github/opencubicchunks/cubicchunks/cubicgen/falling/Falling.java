@@ -18,6 +18,8 @@ import static java.lang.Math.*;
  * @author DaPorkchop_
  */
 public class Falling {
+    public static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("falling.debug", "false"));
+
     public static final IBlockState RING_BLOCK = Blocks.STAINED_GLASS.getStateFromMeta(EnumDyeColor.GRAY.ordinal());
     public static final IBlockState WALL_BLOCK = Blocks.BARRIER.getDefaultState();
     public static final IBlockState INSIDE_BLOCK = Blocks.AIR.getDefaultState();
@@ -38,13 +40,24 @@ public class Falling {
             Biomes.FOREST,
             Biomes.TAIGA,
             Biomes.SWAMPLAND,
-            Biomes.MUSHROOM_ISLAND,
             Biomes.JUNGLE,
             Biomes.ROOFED_FOREST,
-            Biomes.SAVANNA
+            Biomes.SAVANNA,
+            Biomes.BIRCH_FOREST,
+            Biomes.COLD_TAIGA,
+            Biomes.ICE_PLAINS,
+            Biomes.MUTATED_ICE_FLATS
     };
 
     public static final int NUM_BIOMES = BIOMES.length;
+
+    public static Biome biomeFor(int cubeY) {
+        if (DEBUG) {
+            return Biomes.SAVANNA;
+        } else {
+            return BIOMES[(mix32(cubeY >> 6) >>> 1) % NUM_BIOMES];
+        }
+    }
 
     public static Box modifyFullPopulationRequirements(ICube cube, Box fallback) {
         if ((cube.getX() | cube.getZ()) == 0) {
@@ -126,9 +139,5 @@ public class Falling {
     private static int mix32(long z) {
         z = (z ^ (z >>> 33)) * 0x62a9d9ed799705f5L;
         return (int)(((z ^ (z >>> 28)) * 0xcb24d0a5c88c35b3L) >>> 32);
-    }
-
-    public static Biome biomeFor(int cubeY) {
-        return BIOMES[(mix32(cubeY >> 6) >>> 1) % NUM_BIOMES];
     }
 }

@@ -28,6 +28,7 @@ import io.github.opencubicchunks.cubicchunks.api.worldgen.populator.ICubicPopula
 import io.github.opencubicchunks.cubicchunks.api.util.CubePos;
 import io.github.opencubicchunks.cubicchunks.api.world.ICube;
 import io.github.opencubicchunks.cubicchunks.cubicgen.CWGEventFactory;
+import io.github.opencubicchunks.cubicchunks.cubicgen.falling.Falling;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -45,10 +46,15 @@ public class SurfaceSnowPopulator implements ICubicPopulator {
 
     @Override public void generate(World world, Random random, CubePos pos, Biome biome) {
         if (CWGEventFactory.populate(world, random, pos, false, PopulateChunkEvent.Populate.EventType.ICE)) {
+            int baseX = pos.getMinBlockX();
+            int baseZ = pos.getMinBlockZ();
             for (int dx = 0; dx < ICube.SIZE; ++dx) {
                 for (int dz = 0; dz < ICube.SIZE; ++dz) {
                     int xOffset = dx + ICube.SIZE / 2;
                     int zOffset = dz + ICube.SIZE / 2;
+                    if (baseX + xOffset >= -Falling.HOLE_SIZE && baseX + xOffset < Falling.HOLE_SIZE && baseZ + zOffset >= -Falling.HOLE_SIZE && baseZ + zOffset < Falling.HOLE_SIZE) {
+                        continue;
+                    }
                     BlockPos aboveTop = ((ICubicWorld) world).getSurfaceForCube(pos, xOffset, zOffset, 0, ICubicWorld.SurfaceType
                             .BLOCKING_MOVEMENT);
                     if (aboveTop == null) {

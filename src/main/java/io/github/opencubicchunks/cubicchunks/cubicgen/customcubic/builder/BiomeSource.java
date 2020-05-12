@@ -44,6 +44,7 @@ import net.minecraft.world.biome.BiomeProvider;
 import net.minecraftforge.fml.common.registry.ForgeRegistries;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,15 +66,13 @@ public class BiomeSource {
     private static final int SECTIONS_CACHE_RADIUS = 16;
     private static final int SECTIONS_CACHE_SIZE = SECTIONS_CACHE_RADIUS * SECTIONS_CACHE_RADIUS;
 
-    private final double height;
-    private final double variation;
+    public static final double HEIGHT = ConversionUtils.biomeHeightVanilla(Biomes.FOREST.getBaseHeight());
+    public static final double VARIATION = ConversionUtils.biomeHeightVanilla(Biomes.FOREST.getHeightVariation());
+
     private final Map<Biome, IBiomeBlockReplacer[]> replacers = new IdentityHashMap<>();
 
     public BiomeSource(World world, BiomeBlockReplacerConfig conf, BiomeProvider biomeGen, int smoothRadius) {
-        this.height = ConversionUtils.biomeHeightVanilla(Biomes.FOREST.getBaseHeight());
-        this.variation = ConversionUtils.biomeHeightVariationVanilla(Biomes.FOREST.getHeightVariation());
-
-        for (Biome biome : Falling.BIOMES) {
+        for (Biome biome : Falling.DEBUG ? Biome.REGISTRY : Arrays.asList(Falling.BIOMES)) {
             Iterable<IBiomeBlockReplacerProvider> providers = CubicBiome.getCubic(biome).getReplacerProviders();
             List<IBiomeBlockReplacer> list = new ArrayList<>();
             for (IBiomeBlockReplacerProvider prov : providers) {
@@ -84,11 +83,11 @@ public class BiomeSource {
     }
 
     public double getHeight(int x, int y, int z) {
-        return this.height;
+        return HEIGHT;
     }
 
     public double getVolatility(int x, int y, int z) {
-        return this.variation;
+        return VARIATION;
     }
 
     public CubicBiome getBiome(int blockX, int blockY, int blockZ) {

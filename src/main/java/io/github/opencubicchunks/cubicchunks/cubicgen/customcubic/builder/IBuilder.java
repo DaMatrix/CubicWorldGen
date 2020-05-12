@@ -71,6 +71,10 @@ public interface IBuilder {
         return apply(x -> x * c);
     }
 
+    default IBuilder fma(double m, double a) {
+        return apply(x -> x * m + a);
+    }
+
     default IBuilder div(IBuilder builder) {
         return (x, y, z) -> this.get(x, y, z) / builder.get(x, y, z);
     }

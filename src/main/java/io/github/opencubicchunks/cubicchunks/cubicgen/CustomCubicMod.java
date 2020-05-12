@@ -228,7 +228,7 @@ public class CustomCubicMod {
                 .addDefaultBlockReplacers()
                 .defaultDecorators().decorator(new JungleDecorator()));
         autoRegister(event, BiomeMesa.class, b -> b
-                .addBlockReplacer(terrainShapeReplacer()).addBlockReplacer(MesaSurfaceReplacer.provider()).addBlockReplacer(oceanWaterReplacer())
+                .addBlockReplacer(terrainShapeReplacer()).addBlockReplacer(MesaSurfaceReplacer.provider())
                 .decoratorProvider(DefaultDecorator.Ores::new).decoratorProvider(DefaultDecorator::new));
         autoRegister(event, BiomeMushroomIsland.class, b -> b
                 .addDefaultBlockReplacers()
@@ -246,7 +246,7 @@ public class CustomCubicMod {
                 .addDefaultBlockReplacers()
                 .decorator(new SavannaDecorator()).defaultDecorators());
         autoRegister(event, BiomeSavannaMutated.class, b -> b
-                .addBlockReplacer(terrainShapeReplacer()).addBlockReplacer(MutatedSavannaSurfaceReplacer.provider()).addBlockReplacer(oceanWaterReplacer())
+                .addBlockReplacer(terrainShapeReplacer()).addBlockReplacer(MutatedSavannaSurfaceReplacer.provider())
                 .defaultDecorators());
         autoRegister(event, BiomeSnow.class, b -> b
                 .addDefaultBlockReplacers()
@@ -258,7 +258,7 @@ public class CustomCubicMod {
                 .addDefaultBlockReplacers().addBlockReplacer(SwampWaterWithLilypadReplacer.provider())
                 .defaultDecorators().decorator(new SwampDecorator()));
         autoRegister(event, BiomeTaiga.class, b -> b
-                .addBlockReplacer(terrainShapeReplacer()).addBlockReplacer(TaigaSurfaceReplacer.provider()).addBlockReplacer(oceanWaterReplacer())
+                .addBlockReplacer(terrainShapeReplacer()).addBlockReplacer(TaigaSurfaceReplacer.provider())
                 .decorator(new TaigaDecorator()).defaultDecorators());
 
     }

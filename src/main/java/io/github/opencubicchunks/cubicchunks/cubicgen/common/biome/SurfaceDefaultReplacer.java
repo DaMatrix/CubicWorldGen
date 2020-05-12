@@ -50,23 +50,17 @@ public class SurfaceDefaultReplacer implements IBiomeBlockReplacer {
     protected static final IBlockState RED_SANDSTONE = Blocks.RED_SANDSTONE.getDefaultState();
     protected static final IBlockState SANDSTONE = Blocks.SANDSTONE.getDefaultState();
 
-    private final IBuilder depthNoise;
     private final int maxPossibleDepth;
-    private final int bedrockY;
     private IBlockState topBlock;
     private IBlockState fillerBlock;
-    private final double horizontalGradientDepthDecreaseWeight;
-    private final double oceanHeight;
+    private final IBuilder depthNoise;
 
     public SurfaceDefaultReplacer(IBlockState topBlock, IBlockState fillerBlock, IBuilder depthNoise,
             double horizontalGradientDepthDecreaseWeight, double oceanHeight, int surfaceDepthLimit, int bedrockY) {
         this.topBlock = topBlock;
         this.fillerBlock = fillerBlock;
         this.depthNoise = depthNoise;
-        this.horizontalGradientDepthDecreaseWeight = horizontalGradientDepthDecreaseWeight;
-        this.oceanHeight = oceanHeight;
         this.maxPossibleDepth = 9;
-        this.bedrockY = bedrockY;
     }
 
     /**
@@ -75,38 +69,23 @@ public class SurfaceDefaultReplacer implements IBiomeBlockReplacer {
     @Override
     public IBlockState getReplacedBlock(IBlockState previousBlock, int x, int y, int z, double dx, double dy, double dz, double density) {
         // skip everything below if there is no chance it will actually do something
-        if (previousBlock.getBlock() == Blocks.AIR) {
-            return previousBlock;
-        }
-        if (y <= bedrockY) {
-            if (y < bedrockY) {
-                return Blocks.AIR.getDefaultState();
-            }
-            return Blocks.BEDROCK.getDefaultState();
-        }
-        if (density > maxPossibleDepth * abs(dy) || density < 0) {
+        if (previousBlock.getBlock() == Blocks.AIR || density > maxPossibleDepth * abs(dy) || density < 0) {
             return previousBlock;
         }
 
-        double depth = depthNoise.get(x, 0, z);
+        double depth = 3.0d;
         double densityAdjusted = density / abs(dy);
         if (density + dy <= 0) { // if air above
-            if (y < oceanHeight - 7 - depth) { // if we are deep into the ocean
-                return GRAVEL;
-            }
-            if (y < oceanHeight - 1) { // if just below the ocean level
-                return filler(previousBlock, depth);
-            }
             return top(depth);
         } else {
-            double xzSize = Math.sqrt(dx * dx + dz * dz);
-            double dyAdjusted = dy;
-            if (dyAdjusted < 0 && densityAdjusted < depth + 1 - horizontalGradientDepthDecreaseWeight * xzSize / dy) {
-                return fillerBlock;
-            }
-
-            if (fillerBlock.getBlock() == Blocks.SAND && depth > 1 && y > oceanHeight - depth) {
-                return fillerBlock.getValue(BlockSand.VARIANT) == BlockSand.EnumType.RED_SAND ? RED_SANDSTONE : SANDSTONE;
+            if (dy < 0) {
+                double xzSize = Math.sqrt(dx * dx + dz * dz);
+                double depthAdjusted = depth + 1.0d - xzSize / dy;
+                if (densityAdjusted < depthAdjusted) {
+                    return fillerBlock;
+                } else if (fillerBlock.getBlock() == Blocks.SAND && densityAdjusted < depthAdjusted + 3.0d) {
+                    return fillerBlock.getValue(BlockSand.VARIANT) == BlockSand.EnumType.RED_SAND ? RED_SANDSTONE : SANDSTONE;
+                }
             }
         }
         return previousBlock;
@@ -122,10 +101,6 @@ public class SurfaceDefaultReplacer implements IBiomeBlockReplacer {
 
     public IBuilder getDepthNoise() {
         return depthNoise;
-    }
-
-    private IBlockState filler(IBlockState prev, double depth) {
-        return depth > 0 ? fillerBlock : prev;
     }
 
     private IBlockState top(double depth) {

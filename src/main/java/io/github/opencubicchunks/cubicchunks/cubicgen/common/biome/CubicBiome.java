@@ -195,9 +195,7 @@ public final class CubicBiome extends IForgeRegistryEntry.Impl<CubicBiome> {
         }
 
         public Builder addDefaultBlockReplacers() {
-            return addBlockReplacer(terrainShapeReplacer())
-                    .addBlockReplacer(surfaceDefaultReplacer())
-                    .addBlockReplacer(oceanWaterReplacer());
+            return addBlockReplacer(DefaultBlockReplacer.provider());
         }
 
         public Builder addBlockReplacer(IBiomeBlockReplacerProvider provider) {
@@ -215,7 +213,7 @@ public final class CubicBiome extends IForgeRegistryEntry.Impl<CubicBiome> {
 
         public Builder defaultPostDecorators() {
             //this.decoratorProvider(c -> new AnimalsPopulator());
-            //this.decoratorProvider(c -> new SurfaceSnowPopulator());
+            this.decoratorProvider(c -> new SurfaceSnowPopulator());
             return this;
         }
 
