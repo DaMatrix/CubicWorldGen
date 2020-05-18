@@ -199,13 +199,13 @@ public class CustomTerrainGenerator extends BasicCubeGenerator {
 
         double specialVariationFactor = conf.specialHeightVariationFactorBelowAverageY;
         IBuilder volatility = ((IBuilder) biomeSource::getVolatility)
-                .mul((x, y, z) -> height.get(x, y, z) > y ? specialVariationFactor : 1)
+                .mul(specialVariationFactor)
                 .mul(conf.heightVariationFactor)
                 .add(conf.heightVariationOffset);
 
         this.terrainBuilder = selector
                 .lerp(low, high).add(randomHeight2d).mul(volatility).add(height)
-                .sub(volatility.signum().mul((x, y, z) -> y))
+                .sub(28000000)
                 .cached(CACHE_SIZE_3D, HASH_3D);
     }
 

@@ -44,8 +44,8 @@ public class Falling {
             Biomes.ROOFED_FOREST,
             Biomes.SAVANNA,
             Biomes.BIRCH_FOREST,
-            Biomes.COLD_TAIGA,
-            Biomes.ICE_PLAINS,
+            //Biomes.COLD_TAIGA,
+            //Biomes.ICE_PLAINS,
             Biomes.MUTATED_ICE_FLATS
     };
 
